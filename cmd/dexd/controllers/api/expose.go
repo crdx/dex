@@ -123,12 +123,12 @@ func Deployments(c fiber.Ctx) error {
 
 	items := make([]types.DeploymentsResponseItem, 0, len(deployments))
 	for _, d := range deployments {
-		token, found := db.FindToken(d.TokenID)
+		token, found := db.FindTokenUnscoped(d.TokenID)
 		if !found {
 			continue
 		}
 
-		item, found := db.FindItem(token.ItemID)
+		item, found := db.FindItemUnscoped(token.ItemID)
 		if !found {
 			continue
 		}
@@ -140,6 +140,7 @@ func Deployments(c fiber.Ctx) error {
 			IPAddress: d.IPAddress,
 			UserAgent: d.UserAgent,
 			CreatedAt: d.CreatedAt.Format(time.RFC3339),
+			Deleted:   item.DeletedAt.Valid,
 		})
 	}
 

@@ -92,6 +92,11 @@ func deploys(verbose bool, all bool) error {
 		if verbose {
 			row = append(row, util.Truncate(d.UserAgent, 50))
 		}
+		if d.Deleted {
+			for i, cell := range row {
+				row[i] = col.Dim(cell)
+			}
+		}
 		table.AddRow(row)
 	}
 

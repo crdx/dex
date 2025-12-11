@@ -138,4 +138,5 @@ type DeploymentsResponseItem struct {
 	IPAddress string `json:"ip_address"`
 	UserAgent string `json:"user_agent"`
 	CreatedAt string `json:"created_at"`
+	Deleted   bool   `json:"deleted"`
 }
