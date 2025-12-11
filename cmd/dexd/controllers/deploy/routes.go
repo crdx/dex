@@ -13,6 +13,7 @@ import (
 	"crdx.org/dex/cmd/dexd/controllers/api"
 	"crdx.org/dex/cmd/dexd/env"
 	"crdx.org/dex/db"
+	"crdx.org/dex/pkg/mail"
 	"crdx.org/dex/pkg/util"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/limiter"
@@ -116,6 +117,8 @@ func Deploy(c fiber.Ctx) error {
 		UserAgent: util.Truncate(c.Get("user-agent"), 200),
 	})
 
+	go notify(item.Label, note, c.IP(), c.Get("user-agent"), item.URL())
+
 	output := fmt.Sprintf("URL: %s\nNote: %s\n", item.URL(), note)
 	if token.ExpiresAt.Valid {
 		output += fmt.Sprintf("Info: You can continue to deploy to this endpoint for another %s. The public URL will always be accessible.\n", util.FormatDuration(time.Until(token.ExpiresAt.V), true, 2, ""))
@@ -136,4 +139,25 @@ func validateToken(c fiber.Ctx) (*db.Token, error) {
 	}
 
 	return token, nil
+}
+
+func notify(label, note, ipAddress, userAgent, publicURL string) {
+	subject := fmt.Sprintf("deployed %s", label)
+
+	body := fmt.Sprintf(`%s was just deployed!
+
+%s
+
+Note:   %s
+IP:     %s
+Device: %s
+`,
+		label,
+		publicURL,
+		note,
+		ipAddress,
+		userAgent,
+	)
+
+	mail.Send(subject, body)
 }

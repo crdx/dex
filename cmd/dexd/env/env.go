@@ -39,6 +39,8 @@ var (
 	APIKey  = func() string { return env["API_KEY"] }
 
 	TrustedProxies = func() string { return env["TRUSTED_PROXIES"] }
+
+	NotifyDSN = func() string { return env["NOTIFY_DSN"] }
 )
 
 func Init() {
