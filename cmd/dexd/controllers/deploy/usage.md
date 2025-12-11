@@ -15,16 +15,17 @@ POST a multipart form with:
 
 - content: the file to deploy (required)
 - note: a changelog message describing this deployment (required)
+- deployer: name of the deployer (you) (required)
 
 ## Examples
 
 From a file:
 
-curl -sSfX POST {{.DeployURL}} -F "content=@index.html" -F "note=Initial commit"
+curl -sSfX POST {{.DeployURL}} -F "content=@index.html" -F "note=Initial commit" -F "deployer=Alice"
 
 Inline content:
 
-echo '<html><body>Hello</body></html>' | curl -sSfX POST {{.DeployURL}} -F "content=@-;filename=index.html" -F "note=Initial commit"
+echo '<html><body>Hello</body></html>' | curl -sSfX POST {{.DeployURL}} -F "content=@-;filename=index.html" -F "note=Initial commit" -F "deployer=Alice"
 
 ## Notes
 

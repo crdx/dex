@@ -135,6 +135,7 @@ type DeploymentsResponseItem struct {
 	ID        int64  `json:"id"`
 	Ref       string `json:"ref"`
 	Note      string `json:"note"`
+	Deployer  string `json:"deployer"`
 	IPAddress string `json:"ip_address"`
 	UserAgent string `json:"user_agent"`
 	CreatedAt string `json:"created_at"`

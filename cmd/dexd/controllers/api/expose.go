@@ -137,6 +137,7 @@ func Deployments(c fiber.Ctx) error {
 			ID:        d.ID,
 			Ref:       item.Ref(),
 			Note:      d.Note,
+			Deployer:  d.Deployer,
 			IPAddress: d.IPAddress,
 			UserAgent: d.UserAgent,
 			CreatedAt: d.CreatedAt.Format(time.RFC3339),

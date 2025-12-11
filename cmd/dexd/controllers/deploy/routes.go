@@ -90,6 +90,11 @@ func Deploy(c fiber.Ctx) error {
 		return api.FailureResponse(c, http.StatusBadRequest, "note is required")
 	}
 
+	deployer := c.FormValue("deployer")
+	if deployer == "" {
+		return api.FailureResponse(c, http.StatusBadRequest, "deployer is required")
+	}
+
 	fileHeader, err := c.FormFile("content")
 	if err != nil {
 		return api.FailureResponse(c, http.StatusBadRequest, "content file is required")
@@ -113,11 +118,12 @@ func Deploy(c fiber.Ctx) error {
 	db.CreateDeployment(&db.Deployment{
 		TokenID:   token.ID,
 		Note:      note,
+		Deployer:  util.Truncate(deployer, 20),
 		IPAddress: util.Truncate(c.IP(), 45),
 		UserAgent: util.Truncate(c.Get("user-agent"), 200),
 	})
 
-	go notify(item.Label, note, c.IP(), c.Get("user-agent"), item.URL())
+	go notify(item.Label, note, deployer, c.IP(), c.Get("user-agent"), item.URL())
 
 	output := fmt.Sprintf("URL: %s\nNote: %s\n", item.URL(), note)
 	if token.ExpiresAt.Valid {
@@ -154,6 +160,7 @@ Device: %s
 `,
 		label,
 		publicURL,
+		deployer,
 		note,
 		ipAddress,
 		userAgent,

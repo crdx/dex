@@ -75,7 +75,7 @@ func deploys(verbose bool, all bool) error {
 		return errors.New("no deployments")
 	}
 
-	headers := []any{"ID", "Item", "Note", "IP", "When"}
+	headers := []any{"ID", "Item", "Note", "Deployer", "IP", "When"}
 	if verbose {
 		headers = append(headers, "User Agent")
 	}
@@ -86,6 +86,7 @@ func deploys(verbose bool, all bool) error {
 			d.ID,
 			d.Ref,
 			util.Truncate(d.Note, 100),
+			d.Deployer,
 			d.IPAddress,
 			util.FormatTimeSince(mustParseTime(d.CreatedAt), false, 1, "ago"),
 		}
