@@ -15,14 +15,26 @@ import (
 	"crdx.org/dex/db"
 	"crdx.org/dex/pkg/util"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/limiter"
 )
 
 //go:embed usage.md
 var usageTemplate string
 
 func InitRoutes(app *fiber.App) {
+	deployLimiter := limiter.New(limiter.Config{
+		Max:        5,
+		Expiration: 60 * time.Second,
+		KeyGenerator: func(c fiber.Ctx) string {
+			return c.Params("token")
+		},
+		LimitReached: func(c fiber.Ctx) error {
+			return c.SendStatus(http.StatusTooManyRequests)
+		},
+	})
+
 	app.Get("/deploy/:token", Usage)
-	app.Post("/deploy/:token", Deploy)
+	app.Post("/deploy/:token", deployLimiter, Deploy)
 }
 
 type usageData struct {
