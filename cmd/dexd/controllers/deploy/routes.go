@@ -104,9 +104,9 @@ func Deploy(c fiber.Ctx) error {
 		UserAgent: util.Truncate(c.Get("user-agent"), 200),
 	})
 
-	output := fmt.Sprintf("Updated: %s\nNote: %s\n", item.Ref(), note)
+	output := fmt.Sprintf("URL: %s\nNote: %s\n", item.URL(), note)
 	if token.ExpiresAt.Valid {
-		output += fmt.Sprintf("Expires in: %s\n", util.FormatDuration(time.Until(token.ExpiresAt.V), true, 2, ""))
+		output += fmt.Sprintf("Info: You can continue to deploy to this endpoint for another %s. The public URL will always be accessible.\n", util.FormatDuration(time.Until(token.ExpiresAt.V), true, 2, ""))
 	}
 	return c.Type("txt").SendString(output)
 }
