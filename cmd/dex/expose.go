@@ -75,23 +75,24 @@ func deploys(verbose bool, all bool) error {
 		return errors.New("no deployments")
 	}
 
-	headers := []any{"ID", "Item", "Note", "Deployer", "IP", "When"}
+	headers := []any{"Item", "Deployer", "Change", "IP", "When"}
 	if verbose {
 		headers = append(headers, "User Agent")
+		headers = append(headers, "ID")
 	}
 
 	table := newPrettyTable(headers)
 	for _, d := range res.Deployments {
 		row := []any{
-			d.ID,
 			d.Ref,
-			util.Truncate(d.Note, 100),
 			d.Deployer,
+			util.Truncate(d.Change, 100),
 			d.IPAddress,
 			util.FormatTimeSince(mustParseTime(d.CreatedAt), false, 1, "ago"),
 		}
 		if verbose {
 			row = append(row, util.Truncate(d.UserAgent, 50))
+			row = append(row, d.ID)
 		}
 		if d.Deleted {
 			for i, cell := range row {
