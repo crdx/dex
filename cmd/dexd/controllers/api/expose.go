@@ -136,7 +136,7 @@ func Deployments(c fiber.Ctx) error {
 		items = append(items, types.DeploymentsResponseItem{
 			ID:        d.ID,
 			Ref:       item.Ref(),
-			Note:      d.Note,
+			Change:    d.Note,
 			Deployer:  d.Deployer,
 			IPAddress: d.IPAddress,
 			UserAgent: d.UserAgent,

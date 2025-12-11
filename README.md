@@ -105,7 +105,8 @@ The deploy URL can then be used to deploy new content:
 ```bash
 curl -sSfX POST https://d.example.com/deploy/abc123 \
     -F "content=@index.html" \
-    -F "note=Update metrics for December"
+    -F "change=Update metrics for December" \
+    -F "deployer=Alice"
 ```
 
 Manage deploy URLs with `dex urls` and view deployment history with `dex deploys`.

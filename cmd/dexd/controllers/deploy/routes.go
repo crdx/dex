@@ -10,7 +10,6 @@ import (
 	"text/template"
 	"time"
 
-	"crdx.org/dex/cmd/dexd/controllers/api"
 	"crdx.org/dex/cmd/dexd/env"
 	"crdx.org/dex/db"
 	"crdx.org/dex/pkg/mail"
@@ -22,6 +21,8 @@ import (
 //go:embed usage.md
 var usageTemplate string
 
+const errItemNotFound = "Item not found. The item associated with this deploy URL may have been deleted."
+
 func InitRoutes(app *fiber.App) {
 	deployLimiter := limiter.New(limiter.Config{
 		Max:        5,
@@ -30,7 +31,8 @@ func InitRoutes(app *fiber.App) {
 			return c.Params("token")
 		},
 		LimitReached: func(c fiber.Ctx) error {
-			return c.SendStatus(http.StatusTooManyRequests)
+			c.Status(http.StatusTooManyRequests)
+			return c.Type("txt").SendString("Rate limit exceeded. Wait 60 seconds before retrying. Do not retry automatically.\n")
 		},
 	})
 
@@ -45,8 +47,8 @@ type usageData struct {
 }
 
 func Usage(c fiber.Ctx) error {
-	token, err := validateToken(c)
-	if err != nil {
+	token, ok, err := validateToken(c)
+	if !ok || err != nil {
 		return err
 	}
 
@@ -54,7 +56,7 @@ func Usage(c fiber.Ctx) error {
 
 	item, found := db.FindItem(token.ItemID)
 	if !found {
-		return api.FailureResponse(c, http.StatusNotFound, "item not found")
+		return textError(c, http.StatusNotFound, errItemNotFound)
 	}
 
 	data := usageData{
@@ -75,40 +77,41 @@ func Usage(c fiber.Ctx) error {
 }
 
 func Deploy(c fiber.Ctx) error {
-	token, err := validateToken(c)
-	if err != nil {
+	token, ok, err := validateToken(c)
+
+	if !ok || err != nil {
 		return err
 	}
 
 	item, found := db.FindItem(token.ItemID)
 	if !found {
-		return api.FailureResponse(c, http.StatusNotFound, "item not found")
+		return textError(c, http.StatusNotFound, errItemNotFound)
 	}
 
-	note := c.FormValue("note")
-	if note == "" {
-		return api.FailureResponse(c, http.StatusBadRequest, "note is required")
+	change := c.FormValue("change")
+	if change == "" {
+		return textError(c, http.StatusBadRequest, "Missing required form field 'change'. Provide a short description of what changed in this deployment.")
 	}
 
 	deployer := c.FormValue("deployer")
 	if deployer == "" {
-		return api.FailureResponse(c, http.StatusBadRequest, "deployer is required")
+		return textError(c, http.StatusBadRequest, "Missing required form field 'deployer'. Provide the name or identifier of who is deploying.")
 	}
 
 	fileHeader, err := c.FormFile("content")
 	if err != nil {
-		return api.FailureResponse(c, http.StatusBadRequest, "content file is required")
+		return textError(c, http.StatusBadRequest, "Missing required form field 'content'. Provide the file to deploy as multipart form data.")
 	}
 
 	file, err := fileHeader.Open()
 	if err != nil {
-		return api.FailureResponse(c, http.StatusInternalServerError, "failed to open file")
+		return textError(c, http.StatusInternalServerError, "Failed to open uploaded file. Try again or check the file is valid.")
 	}
 	defer func() { _ = file.Close() }()
 
 	content, err := io.ReadAll(file)
 	if err != nil {
-		return api.FailureResponse(c, http.StatusInternalServerError, "failed to read file")
+		return textError(c, http.StatusInternalServerError, "Failed to read uploaded file. Try again or check the file is valid.")
 	}
 
 	blob := db.FindOrCreateBlob(content)
@@ -117,51 +120,55 @@ func Deploy(c fiber.Ctx) error {
 
 	db.CreateDeployment(&db.Deployment{
 		TokenID:   token.ID,
-		Note:      note,
+		Note:      change,
 		Deployer:  util.Truncate(deployer, 20),
 		IPAddress: util.Truncate(c.IP(), 45),
 		UserAgent: util.Truncate(c.Get("user-agent"), 200),
 	})
 
-	go notify(item.Label, note, deployer, c.IP(), c.Get("user-agent"), item.URL())
+	go notify(item.Label, change, deployer, c.IP(), c.Get("user-agent"), item.URL())
 
-	output := fmt.Sprintf("URL: %s\nNote: %s\n", item.URL(), note)
+	output := fmt.Sprintf("Congratulations! You have successfully deployed to %s\n", item.URL())
+	output += fmt.Sprintf("Change: %s\n", change)
 	if token.ExpiresAt.Valid {
 		output += fmt.Sprintf("Info: You can continue to deploy to this endpoint for another %s. The public URL will always be accessible.\n", util.FormatDuration(time.Until(token.ExpiresAt.V), true, 2, ""))
 	}
 	return c.Type("txt").SendString(output)
 }
 
-func validateToken(c fiber.Ctx) (*db.Token, error) {
-	tokenStr := c.Params("token")
+func validateToken(c fiber.Ctx) (*db.Token, bool, error) {
+	value := c.Params("token")
 
-	token, found := db.FindTokenByToken(tokenStr)
+	token, found := db.FindTokenByToken(value)
 	if !found {
-		return nil, api.FailureResponse(c, http.StatusNotFound, "deploy url not found")
+		return nil, false, textError(c, http.StatusNotFound, "Deploy URL not found. Check the URL is correct and has not been revoked.")
 	}
 
 	if token.ExpiresAt.Valid && token.ExpiresAt.V.Before(time.Now()) {
-		return nil, api.FailureResponse(c, http.StatusGone, "deploy url expired")
+		return nil, false, textError(c, http.StatusGone, "Deploy URL has expired. Request a new deploy URL to continue deploying.")
 	}
 
-	return token, nil
+	return token, true, nil
 }
 
-func notify(label, note, ipAddress, userAgent, publicURL string) {
-	subject := fmt.Sprintf("deployed %s", label)
+func textError(c fiber.Ctx, status int, message string) error {
+	c.Status(status)
+	return c.Type("txt").SendString(message + "\n")
+}
 
-	body := fmt.Sprintf(`%s was just deployed!
+func notify(label, change, deployer, ipAddress, userAgent, publicURL string) {
+	subject := fmt.Sprintf("%s deployed %s", deployer, label)
 
-%s
+	body := fmt.Sprintf(`%s just deployed %s to %s
 
-Note:   %s
+Change: %s
 IP:     %s
 Device: %s
 `,
+		deployer,
 		label,
 		publicURL,
-		deployer,
-		note,
+		change,
 		ipAddress,
 		userAgent,
 	)

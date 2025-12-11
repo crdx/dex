@@ -134,7 +134,7 @@ type DeploymentsResponse struct {
 type DeploymentsResponseItem struct {
 	ID        int64  `json:"id"`
 	Ref       string `json:"ref"`
-	Note      string `json:"note"`
+	Change    string `json:"change"`
 	Deployer  string `json:"deployer"`
 	IPAddress string `json:"ip_address"`
 	UserAgent string `json:"user_agent"`

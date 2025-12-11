@@ -14,18 +14,18 @@
 POST a multipart form with:
 
 - content: the file to deploy (required)
-- note: a changelog message describing this deployment (required)
+- change: a changelog message describing this deployment (required)
 - deployer: name of the deployer (you) (required)
 
 ## Examples
 
 From a file:
 
-curl -sSfX POST {{.DeployURL}} -F "content=@index.html" -F "note=Initial commit" -F "deployer=Alice"
+curl {{.DeployURL}} -F "content=@index.html" -F "change=Initial commit" -F "deployer=Alice"
 
 Inline content:
 
-echo '<html><body>Hello</body></html>' | curl -sSfX POST {{.DeployURL}} -F "content=@-;filename=index.html" -F "note=Initial commit" -F "deployer=Alice"
+echo '<html><body>Hello</body></html>' | curl {{.DeployURL}} -F "content=@-;filename=index.html" -F "change=Initial commit" -F "deployer=Alice"
 
 ## Notes
 
@@ -36,10 +36,10 @@ Deploy a new version when it's ready for the user.
 When deploying a new version:
 
 1. Write the complete HTML file to disk (e.g. index.html)
-2. Use curl to POST the file with a descriptive changelog note
+2. Use curl to POST the file with a descriptive changelog message
 3. The public URL remains the same; content is replaced
 
-The changelog note is mandatory. Think of it as a commit message and use it to describe what changed, e.g.:
+The changelog message is mandatory. Think of it as a commit message and use it to describe what changed, e.g.:
 
 - Add dark mode support
 - Correct calculation in results table
