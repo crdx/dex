@@ -21,11 +21,11 @@ POST a multipart form with:
 
 From a file:
 
-curl {{.DeployURL}} -F "content=@index.html" -F "change=Initial commit" -F "deployer=Alice"
+curl -s {{.DeployURL}} -F "content=@index.html" -F "change=Initial commit" -F "deployer=Alice"
 
 Inline content:
 
-echo '<html><body>Hello</body></html>' | curl {{.DeployURL}} -F "content=@-;filename=index.html" -F "change=Initial commit" -F "deployer=Alice"
+echo '<html><body>Hello</body></html>' | curl -s {{.DeployURL}} -F "content=@-;filename=index.html" -F "change=Initial commit" -F "deployer=Alice"
 
 ## Notes
 
