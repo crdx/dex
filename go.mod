@@ -30,7 +30,7 @@ require (
 	github.com/gofiber/schema v1.6.0 // indirect
 	github.com/gofiber/template v1.8.3 // indirect
 	github.com/gofiber/utils v1.1.0 // indirect
-	github.com/gofiber/utils/v2 v2.0.0-rc.3 // indirect
+	github.com/gofiber/utils/v2 v2.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/icholy/digest v1.1.0 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
