@@ -1,0 +1,19 @@
+version: '2'
+sql:
+  - name: dex
+    engine: mysql
+    queries: db/queries
+    schema: db/schema
+    codegen:
+      - plugin: starfield
+        out: db
+        options:
+          package: db
+          max_params: 3
+          rename:
+            uuid: UUID
+            ip_address: IPAddress
+plugins:
+  - name: starfield
+    process:
+      cmd: starfield
