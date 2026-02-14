@@ -1,0 +1,8 @@
+/bin
+*.gen.go
+
+# sfe: ignore rest
+.env
+.env.prod
+local.just
+/dex.config.json
