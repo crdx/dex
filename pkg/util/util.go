@@ -202,7 +202,7 @@ func PathExists(filePath string) bool {
 }
 
 func PassThrough(name string, arg ...string) error {
-	cmd := exec.Command(name, arg...)
+	cmd := exec.Command(name, arg...) //nolint:gosec // G204: args are trusted internal values
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

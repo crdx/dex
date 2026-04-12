@@ -38,7 +38,7 @@ func Save(key string, url string) error {
 		BaseURL: url,
 	}
 
-	b, err := json.Marshal(&c)
+	b, err := json.Marshal(&c) //nolint:gosec // G117: APIKey is not a secret in this context
 	if err != nil {
 		return err
 	}
