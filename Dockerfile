@@ -11,7 +11,8 @@ RUN go mod download
 
 # Build.
 COPY . .
-RUN go build -o dex -trimpath -ldflags '-s -w' ./cmd/dexd
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    go build -o dex -trimpath -ldflags '-s -w' ./cmd/dexd
 
 # ——————————————————————————————————————————————————————————————————————————————————————————————————
 FROM alpine:3.23.0
