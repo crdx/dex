@@ -18,16 +18,13 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 FROM alpine:3.23.0
 # https://hub.docker.com/_/alpine
 
-RUN apk add --no-cache tzdata && \
-    cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
-    echo 'Europe/London' > /etc/timezone && \
-    apk del tzdata
-
 RUN apk add --no-cache \
     bash \
     curl \
-    tzdata \
-    mailcap
+    mailcap \
+    tzdata && \
+    cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
+    echo 'Europe/London' > /etc/timezone
 # mailcap for /etc/mime.types
 
 RUN addgroup -g 1000 anon && \
