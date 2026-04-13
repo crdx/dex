@@ -11,7 +11,7 @@ RUN go mod download
 
 # Build.
 COPY . .
-RUN --mount=type=cache,target=/root/.cache/go-build \
+RUN --mount=type=cache,id=dex,target=/root/.cache/go-build \
     go build -o dex -trimpath -ldflags '-s -w' ./cmd/dexd
 
 # ——————————————————————————————————————————————————————————————————————————————————————————————————
