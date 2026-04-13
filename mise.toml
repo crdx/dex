@@ -3,6 +3,7 @@
 hivemind = "latest"
 sqlc = "latest"
 golangci-lint = "latest"
+"go:crdx.org/cmd/unbuffer" = "latest"
 
 [env]
 _.path = ["bin"]

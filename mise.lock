@@ -14,6 +14,10 @@ checksum = "sha256:d4a599d2d1aa6580aa14c9f3929fb827bf17ffacc7c2c306dbecbe8773247
 url = "https://github.com/crdx/starfield/releases/download/v1.10.0/starfield_linux_amd64.tar.gz"
 url_api = "https://api.github.com/repos/crdx/starfield/releases/assets/394869916"
 
+[[tools."go:crdx.org/cmd/unbuffer"]]
+version = "1.10.0"
+backend = "go:crdx.org/cmd/unbuffer"
+
 [[tools.golangci-lint]]
 version = "2.11.4"
 backend = "aqua:golangci/golangci-lint"
