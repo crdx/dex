@@ -1,13 +1,13 @@
 services:
   app:
+    container_name: dex_app
     init: true
     restart: unless-stopped
     image: dex_app
     env_file: .env.prod
     networks:
-      dex_network:
-    ports:
-      - 127.0.0.1:2006:2006
+      - dex_network
+      - web
     volumes:
       - /run/mysqld/:/run/mysqld/:ro
     healthcheck:
@@ -15,9 +15,12 @@ services:
       interval: 30s
       timeout: 5s
       retries: 2
+
 networks:
   dex_network:
     driver: bridge
     ipam:
-     config:
-       - subnet: 192.168.64.0/24
+      config:
+        - subnet: 192.168.64.0/24
+  web:
+    external: true
