@@ -11,7 +11,7 @@ services:
     volumes:
       - /run/mysqld/:/run/mysqld/:ro
     healthcheck:
-      test: /app/healthcheck
+      test: ["CMD", "/init", "--health"]
       interval: 30s
       timeout: 5s
       retries: 2

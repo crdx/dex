@@ -1,42 +1,34 @@
-FROM golang:1.25.5-alpine3.23 AS build
+FROM golang:1.26.3-trixie AS build
 # https://hub.docker.com/_/golang
 
-RUN apk add --no-cache \
-    build-base \
-    git
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        git \
+        media-types \
+        tzdata && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
-COPY go.sum go.mod .
+
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Build.
 COPY . .
 RUN --mount=type=cache,id=dex,target=/root/.cache/go-build \
-    go build -o dex -trimpath -ldflags '-s -w' ./cmd/dexd
+    CGO_ENABLED=0 go build -o dex -trimpath -ldflags '-s -w' ./cmd/dexd
 
 # ——————————————————————————————————————————————————————————————————————————————————————————————————
-FROM alpine:3.23.0
-# https://hub.docker.com/_/alpine
+FROM scratch
 
-RUN apk add --no-cache \
-    bash \
-    curl \
-    mailcap \
-    tzdata && \
-    cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
-    echo 'Europe/London' > /etc/timezone
-# mailcap for /etc/mime.types
-
-RUN addgroup -g 1000 anon && \
-    adduser -G anon -D -u 1000 anon
-
-WORKDIR /app
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /usr/share/zoneinfo/Europe/London /etc/localtime
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build /etc/mime.types /etc/mime.types
 COPY --from=build /build/dex /init
 
-# This needs to be a script within the container because we need access to $PORT.
-RUN echo 'curl -sSf http://localhost:$PORT/health' >> healthcheck && \
-    chmod +x healthcheck
-
-USER anon
+WORKDIR /app
+USER 1000:1000
 
 CMD ["/init"]

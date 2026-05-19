@@ -3,6 +3,8 @@ package main
 import (
 	"embed"
 	"log"
+	"net/http"
+	"os"
 
 	"crdx.org/dex/cmd/dexd/config"
 	"crdx.org/dex/cmd/dexd/env"
@@ -35,6 +37,8 @@ type Opts struct {
 
 func main() {
 	log.SetFlags(0)
+	checkHealth()
+
 	opts := duckopt.MustBind[Opts](getUsage(), "$0")
 
 	initEnvironment(opts.EnvFile)
@@ -47,6 +51,24 @@ func main() {
 	config.InitRoutes(app)
 
 	panic(app.Listen(env.Host() + ":" + env.Port()))
+}
+
+func checkHealth() {
+	if len(os.Args) != 2 || os.Args[1] != "--health" {
+		return
+	}
+
+	response, err := http.Get("http://localhost:" + os.Getenv("PORT") + "/health")
+	if err != nil || response == nil {
+		os.Exit(1)
+	}
+	defer func() { _ = response.Body.Close() }()
+
+	if response.StatusCode != http.StatusOK {
+		os.Exit(1)
+	}
+
+	os.Exit(0)
 }
 
 func initEnvironment(envFile string) {
