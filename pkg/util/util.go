@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -39,6 +40,18 @@ func FromASCII85(b string) []byte {
 func ToSHA1(b []byte) string {
 	hash := sha1.Sum(b) //nolint:gosec // G401: used for content fingerprinting, not security
 	return hex.EncodeToString(hash[:])
+}
+
+// AssertPublicIP panics if the given IP address is a private or loopback address. This guards
+// against accidentally recording a reverse proxy's internal IP instead of the real client IP.
+func AssertPublicIP(address string) {
+	ip := net.ParseIP(address)
+	if ip == nil {
+		panic("invalid IP address: " + address)
+	}
+	if ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() {
+		panic("refusing to record private IP address: " + address)
+	}
 }
 
 func Truncate(s string, max int) string {

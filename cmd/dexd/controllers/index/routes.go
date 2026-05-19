@@ -26,6 +26,8 @@ func Get(c fiber.Ctx) error {
 	db.IncrementHits(item.ID)
 	item.UpdateLastHitAt(db.Now())
 
+	util.AssertPublicIP(c.IP())
+
 	db.CreateLog(&db.Log{
 		ItemID:    item.ID,
 		Method:    util.Truncate(c.Method(), 10),

@@ -117,6 +117,8 @@ func Deploy(c fiber.Ctx) error {
 
 	item.UpdateBlobHash(blob.Hash)
 
+	util.AssertPublicIP(c.IP())
+
 	db.CreateDeployment(&db.Deployment{
 		TokenID:   token.ID,
 		Note:      change,
