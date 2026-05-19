@@ -32,10 +32,17 @@ func GetFiberConfig(views fs.FS, subdir string) fiber.Config {
 
 	if env.TrustedProxies() != "" {
 		config.TrustProxy = true
-		config.TrustProxyConfig = fiber.TrustProxyConfig{
-			Proxies: lo.Map(strings.Split(env.TrustedProxies(), ","), util.MapTrimSpace),
-		}
 		config.ProxyHeader = "X-Forwarded-For"
+
+		if env.TrustedProxies() == "private" {
+			config.TrustProxyConfig = fiber.TrustProxyConfig{
+				Private: true,
+			}
+		} else {
+			config.TrustProxyConfig = fiber.TrustProxyConfig{
+				Proxies: lo.Map(strings.Split(env.TrustedProxies(), ","), util.MapTrimSpace),
+			}
+		}
 	}
 
 	if env.Production() {

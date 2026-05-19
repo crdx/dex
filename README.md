@@ -228,9 +228,10 @@ The API key for authenticating client requests. Keys are compared using a consta
 ### TRUSTED_PROXIES
 
 - Required: no
-- Value: comma-separated list of IP addresses e.g., `127.0.0.1`
+- Value: comma-separated list of IP addresses or CIDR ranges, or `private` to trust all private ranges
+- Examples: `127.0.0.1`, `172.18.0.0/16`, `private`
 
-If running behind a reverse proxy then set this to the proxy's IP address(es). This will ensure the correct IP address is displayed in logs.
+If running behind a reverse proxy then set this to the proxy's IP address(es). Setting it to `private` trusts all private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16), which is useful for Docker network setups. This will ensure the correct IP address is displayed in logs.
 
 ## Contributions
 
