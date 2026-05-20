@@ -58,7 +58,7 @@ func checkHealth() {
 		return
 	}
 
-	response, err := http.Get("http://localhost:" + os.Getenv("PORT") + "/health")
+	response, err := http.Get("http://localhost:" + os.Getenv("PORT") + "/health") //nolint:gosec // Health check against localhost only.
 	if err != nil || response == nil {
 		os.Exit(1)
 	}
