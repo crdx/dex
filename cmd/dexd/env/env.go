@@ -29,8 +29,8 @@ var (
 	Host = func() string { return env["HOST"] }
 	Port = func() string { return env["PORT"] }
 
-	DatabaseName     = func() string { return env["DB_NAME"] }
-	DatabaseUsername = func() string { return env["DB_USERNAME"] }
+	DatabaseName     = func() string { return or("DB_NAME", "dex") }
+	DatabaseUsername = func() string { return or("DB_USERNAME", "dex") }
 	DatabasePassword = func() string { return env["DB_PASSWORD"] }
 	DatabaseProtocol = func() string { return env["DB_PROTOCOL"] }
 	DatabaseAddress  = func() string { return env["DB_ADDRESS"] }
@@ -84,7 +84,6 @@ func Validate() error {
 	}
 
 	e(require(Host, "HOST"))
-	e(require(DatabaseName, "DB_NAME"))
 
 	e(require(APIKey, "API_KEY"))
 	e(require(BaseURL, "BASE_URL"))
@@ -161,7 +160,7 @@ func requireIn(f func() string, name string, values []string, canBeEmpty bool) e
 	return nil
 }
 
-func or(name string, default_ string) string { //nolint:unused
+func or(name string, default_ string) string {
 	value := env[name]
 
 	if value != "" {
