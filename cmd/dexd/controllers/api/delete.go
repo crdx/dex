@@ -12,8 +12,6 @@ import (
 func Delete(c fiber.Ctx) error {
 	ref := util.ItemRef(c.Params("*"))
 
-	fmt.Printf("%#v\n", ref)
-
 	if item, found := db.FindItemByRef(ref, ref); found {
 		item.Delete()
 		return c.JSON(types.DeleteResponse{
