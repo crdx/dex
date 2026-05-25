@@ -63,7 +63,9 @@ func request[T any](method string, path string, payload any, qs map[string]strin
 	var success T
 	var failure types.FailureResponse
 
-	req := config.Request()
+	req := config.Request().
+		SetSuccessResult(&success).
+		SetErrorResult(&failure)
 
 	if payload != nil {
 		req.SetBody(payload)
@@ -73,10 +75,7 @@ func request[T any](method string, path string, payload any, qs map[string]strin
 		req.SetQueryParams(qs)
 	}
 
-	res, err := req.
-		SetSuccessResult(&success).
-		SetErrorResult(&failure).
-		Send(method, config.Endpoint(path))
+	res, err := req.Send(method, config.Endpoint(path))
 	if err != nil {
 		return success, err
 	}

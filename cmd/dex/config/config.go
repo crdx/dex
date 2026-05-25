@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 
 	"crdx.org/dex/cmd/dexd/env"
+	"crdx.org/dex/pkg/req"
 	"crdx.org/dex/pkg/util"
-	"github.com/imroc/req/v3"
 	"github.com/samber/lo"
 )
 
@@ -84,11 +84,10 @@ func Endpoint(s string) string {
 }
 
 func Request() *req.Request {
-	c := req.C()
-	if env.Debug() {
-		c.DevMode()
-	}
-	return c.R().SetBearerAuthToken(config.APIKey)
+	return req.NewClient().
+		SetDebug(env.Debug()).
+		SetBearerAuth(config.APIKey).
+		R()
 }
 
 // —————————————————————————————————————————————————————————————————————————————————————————————————
