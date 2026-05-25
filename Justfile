@@ -9,6 +9,8 @@ DB_NAME := 'dex'
 
 import? 'local.just'
 
+mod release
+
 export CGO_ENABLED := '0'
 
 mod make
