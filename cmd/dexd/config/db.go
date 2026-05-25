@@ -2,12 +2,11 @@ package config
 
 import (
 	"database/sql"
-	"strings"
 
 	"crdx.org/dex/cmd/dexd/env"
 	"crdx.org/dex/db"
 	"crdx.org/dex/db/schema"
-	"github.com/google/uuid"
+	"github.com/lithammer/shortuuid/v3"
 )
 
 func GetDbConfig() *db.Config {
@@ -35,7 +34,7 @@ func GetTestDbConfig() *db.Config {
 			return sql.Open("mysql", dsn.Format())
 		},
 		DataSource: db.NewDSN().Apply(func(dsn *db.DSN) *db.DSN {
-			dsn.DBName = env.DatabaseName() + "_test_" + strings.ReplaceAll(uuid.NewString(), "-", "")
+			dsn.DBName = env.DatabaseName() + "_test_" + shortuuid.New()
 			dsn.Username = env.DatabaseUsername()
 			dsn.Password = env.DatabasePassword()
 			dsn.Address = env.DatabaseAddress()
