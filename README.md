@@ -16,7 +16,7 @@ go install crdx.org/dex/cmd/dex@latest
 go install crdx.org/dex/cmd/dexd@latest
 ```
 
-## CLI
+## Usage
 
 ```
 Usage:
