@@ -18,6 +18,9 @@ func Copy(c fiber.Ctx) error {
 	}
 
 	if req.To != "" {
+		if isReservedLabel(req.To) {
+			return errReservedRef(c, req.To)
+		}
 		if _, found := db.FindItemByLabel(req.To); found {
 			return errDuplicateRef(c, req.To)
 		}

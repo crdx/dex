@@ -23,6 +23,9 @@ func Upload(c fiber.Ctx) error {
 	var item *db.Item
 
 	if req.Label != "" {
+		if isReservedLabel(req.Label) {
+			return errReservedRef(c, req.Label)
+		}
 		if foundItem, found := db.FindItemByLabel(req.Label); found {
 			if !req.Force {
 				return errDuplicateRef(c, req.Label)
