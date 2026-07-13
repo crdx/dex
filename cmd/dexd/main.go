@@ -45,7 +45,7 @@ func main() {
 	initState()
 
 	app := fiber.New(config.GetFiberConfig(views, "views"))
-	app.Get("/health", healthcheck.New())
+	app.Get("/-/health", healthcheck.New())
 
 	config.InitMiddleware(app)
 	config.InitRoutes(app)
@@ -58,7 +58,7 @@ func checkHealth() {
 		return
 	}
 
-	response, err := http.Get("http://localhost:" + os.Getenv("PORT") + "/health") //nolint:gosec // Health check against localhost only.
+	response, err := http.Get("http://localhost:" + os.Getenv("PORT") + "/-/health") //nolint:gosec // Health check against localhost only.
 	if err != nil || response == nil {
 		os.Exit(1)
 	}
