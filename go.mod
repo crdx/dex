@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	crdx.org/col v1.3.0
 	crdx.org/duckopt/v2 v2.3.0
-	github.com/go-sql-driver/mysql v1.10.0
+	github.com/go-sql-driver/mysql v1.10.1
 	github.com/gofiber/fiber/v3 v3.3.0
 	github.com/gofiber/template/html/v2 v2.1.3
 	github.com/jedib0t/go-pretty v4.3.0+incompatible

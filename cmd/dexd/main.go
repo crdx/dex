@@ -5,14 +5,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"crdx.org/dex/cmd/dexd/config"
 	"crdx.org/dex/cmd/dexd/env"
 	"crdx.org/dex/db"
+	"crdx.org/dex/pkg/mysql"
 	"crdx.org/dex/pkg/util"
 	"crdx.org/duckopt/v2"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/healthcheck"
 	"github.com/samber/lo"
@@ -50,7 +52,22 @@ func main() {
 	config.InitMiddleware(app)
 	config.InitRoutes(app)
 
-	panic(app.Listen(env.Host() + ":" + env.Port()))
+	serve(app, env.Host()+":"+env.Port())
+}
+
+func serve(app *fiber.App, address string) {
+	go func() {
+		if err := app.Listen(address); err != nil {
+			panic(err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	_ = app.Shutdown()
+	mysql.CloseAll()
 }
 
 func checkHealth() {

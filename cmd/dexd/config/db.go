@@ -6,13 +6,14 @@ import (
 	"crdx.org/dex/cmd/dexd/env"
 	"crdx.org/dex/db"
 	"crdx.org/dex/db/schema"
+	"crdx.org/dex/pkg/mysql"
 	"github.com/lithammer/shortuuid/v3"
 )
 
 func GetDbConfig() *db.Config {
 	return &db.Config{
 		Open: func(dsn *db.DSN) (*sql.DB, error) {
-			return sql.Open("mysql", dsn.Format())
+			return mysql.Open(dsn.Format())
 		},
 		DataSource: db.NewDSN().Apply(func(dsn *db.DSN) *db.DSN {
 			dsn.DBName = env.DatabaseName()
@@ -31,7 +32,7 @@ func GetDbConfig() *db.Config {
 func GetTestDbConfig() *db.Config {
 	return &db.Config{
 		Open: func(dsn *db.DSN) (*sql.DB, error) {
-			return sql.Open("mysql", dsn.Format())
+			return mysql.Open(dsn.Format())
 		},
 		DataSource: db.NewDSN().Apply(func(dsn *db.DSN) *db.DSN {
 			dsn.DBName = env.DatabaseName() + "_test_" + shortuuid.New()
