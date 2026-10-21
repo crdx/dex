@@ -16,7 +16,6 @@ fi
 sed -i "s/^## \[Next\]\$/&\n\n## [${NEW_VERSION}] — $(date +%F)/" CHANGELOG.md
 
 git add CHANGELOG.md
-
 if git diff --cached --quiet; then
     echo "Nothing to commit (files already committed)."
 else
