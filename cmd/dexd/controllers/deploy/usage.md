@@ -14,8 +14,8 @@
 POST a multipart form with:
 
 - content: the file to deploy (required)
-- change: a changelog message describing this deployment (required, max 80 characters)
-- deployer: name of the deployer (you) (required)
+- change: a changelog message describing this deployment (required, one line, max 80 characters)
+- deployer: name of the deployer (you) (required, one line, max 20 characters)
 
 ## Examples
 

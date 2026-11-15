@@ -7,8 +7,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"text/template"
 	"time"
+	"unicode"
 
 	"crdx.org/dex/cmd/dexd/env"
 	"crdx.org/dex/db"
@@ -91,10 +93,19 @@ func Deploy(c fiber.Ctx) error {
 	if len(change) > 80 {
 		return textError(c, http.StatusBadRequest, "Field 'change' exceeds 80 characters. Provide a shorter description.")
 	}
+	if strings.ContainsFunc(change, unicode.IsControl) {
+		return textError(c, http.StatusBadRequest, "Field 'change' contains control characters such as line breaks. Provide a single line of text.")
+	}
 
 	deployer := c.FormValue("deployer")
 	if deployer == "" {
 		return textError(c, http.StatusBadRequest, "Missing required form field 'deployer'. Provide the name or identifier of who is deploying.")
+	}
+	if len(deployer) > 20 {
+		return textError(c, http.StatusBadRequest, "Field 'deployer' exceeds 20 characters. Provide a shorter name.")
+	}
+	if strings.ContainsFunc(deployer, unicode.IsControl) {
+		return textError(c, http.StatusBadRequest, "Field 'deployer' contains control characters such as line breaks. Provide a single line of text.")
 	}
 
 	fileHeader, err := c.FormFile("content")
@@ -122,7 +133,7 @@ func Deploy(c fiber.Ctx) error {
 	db.CreateDeployment(&db.Deployment{
 		TokenID:   token.ID,
 		Note:      change,
-		Deployer:  util.Truncate(deployer, 20),
+		Deployer:  deployer,
 		IPAddress: util.Truncate(c.IP(), 45),
 		UserAgent: util.Truncate(c.Get("user-agent"), 200),
 	})

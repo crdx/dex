@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -47,6 +48,28 @@ func (self *Session) Get(path string) *Response {
 
 func (self *Session) PostForm(path string, formData map[string]string) *Response {
 	return self.sendForm(http.MethodPost, path, formData)
+}
+
+// PostMultipart sends a multipart form. Each entry of files maps a field name to the content of a file.
+func (self *Session) PostMultipart(path string, fields, files map[string]string) *Response {
+	var payload bytes.Buffer
+	writer := multipart.NewWriter(&payload)
+
+	for key, value := range fields {
+		lo.Must0(writer.WriteField(key, value))
+	}
+
+	for key, content := range files {
+		part := lo.Must(writer.CreateFormFile(key, key))
+		lo.Must(part.Write([]byte(content)))
+	}
+
+	lo.Must0(writer.Close())
+
+	req := httptest.NewRequest(http.MethodPost, path, &payload)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	return self.send(req)
 }
 
 func (self *Session) PostJSON(path string, jsonData any) *Response {
